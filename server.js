@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const customerAuthRoutes = require("./routes/customerAuthRoutes");
 const sellerAuthRoutes = require("./routes/sellerAuthRoutes");
 const adminAuthRoutes = require("./routes/adminAuthRoutes");
@@ -6,7 +7,9 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const subcategoryRoutes = require("./routes/subcategoryRoutes");
 
 const app = express();
+
 app.use(express.json());
+app.use(cors());
 
 app.use("/api/customer", customerAuthRoutes);
 app.use("/api/seller", sellerAuthRoutes);

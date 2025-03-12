@@ -1,6 +1,6 @@
 const express = require("express");
 const { getListings, createListing, approveListing } = require("../controllers/listingController");
-const { verifyAdmin } = require("../middlewares/authMiddleware");
+const { verifyAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
