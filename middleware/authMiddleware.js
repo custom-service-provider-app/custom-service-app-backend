@@ -19,3 +19,11 @@ exports.isAdmin = (req, res, next) => {
   }
   next();
 };
+
+exports.isSeller = (req, res, next) => {
+  if (req.user.role !== "SELLER") {
+    return res.status(403).json({ error: "Access denied. Only SELLERS can add a listing." });
+  }
+  next();
+};
+

@@ -1,11 +1,13 @@
 const express = require("express");
-const { getListings, createListing, approveListing } = require("../controllers/listingController");
-const { verifyAdmin } = require("../middleware/authMiddleware");
+const { getListings, createListing, approveListing, getListingsByCategory } = require("../controllers/listingController");
+const { verifyAdmin, verifyToken, isSeller } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.get("/", getListings);
-router.post("/", createListing);
-router.put("/:id/approve", verifyAdmin, approveListing);
+router.post("/", verifyToken, isSeller, createListing);
+router.get("/filter", getListingsByCategory);
+
+// router.put("/:id/approve", verifyAdmin, approveListing);
 
 module.exports = router;
