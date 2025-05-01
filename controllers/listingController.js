@@ -2,9 +2,43 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+// exports.createListing = async (req, res) => {
+//   const { title, description, price, location, categoryId, subCategoryId } = req.body;
+//   const sellerId = req.user.userId; // Extract from authenticated user
+
+//   try {
+//     const listing = await prisma.listing.create({
+//       data: {
+//         title,
+//         description,
+//         price: parseFloat(price),
+//         location,
+//         categoryId,
+//         subCategoryId, // ✅ Correct field name (with capital "C")
+//         ownerId: sellerId, // ✅ Assign logged-in seller
+//         status: "PENDING", // ✅ Default status
+//       },
+//     });
+
+//     res.status(201).json({ message: "Listing created successfully, pending approval.", listing });
+//   } catch (error) {
+//     console.error("Error creating listing:", error);
+//     res.status(500).json({ error: "Server error while adding listing.", details: error.message });
+//   }
+// };
+
 exports.createListing = async (req, res) => {
-  const { title, description, price, location, categoryId, subCategoryId } = req.body;
-  const sellerId = req.user.userId; // Extract from authenticated user
+  const {
+    title,
+    description,
+    price,
+    location,
+    latitude,
+    longitude,
+    categoryId,
+    subCategoryId
+  } = req.body;
+  const sellerId = req.user.userId;
 
   try {
     const listing = await prisma.listing.create({
@@ -13,10 +47,12 @@ exports.createListing = async (req, res) => {
         description,
         price: parseFloat(price),
         location,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
         categoryId,
-        subCategoryId, // ✅ Correct field name (with capital "C")
-        ownerId: sellerId, // ✅ Assign logged-in seller
-        status: "PENDING", // ✅ Default status
+        subCategoryId,
+        ownerId: sellerId,
+        status: "PENDING",
       },
     });
 
@@ -26,6 +62,7 @@ exports.createListing = async (req, res) => {
     res.status(500).json({ error: "Server error while adding listing.", details: error.message });
   }
 };
+
 
 exports.getListings = async (req, res) => {
   try {

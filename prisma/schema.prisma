@@ -23,7 +23,9 @@ model Listing {
   description   String
   price         Float
   location      String
-  status        Status   @default(PENDING) // Approval system
+  latitude      Float?   // ← NEW: Optional for now
+  longitude     Float?   // ← NEW: Optional for now
+  status        Status   @default(PENDING)
   ownerId       String
   owner         User     @relation(fields: [ownerId], references: [id])
   categoryId    String
@@ -32,6 +34,7 @@ model Listing {
   subcategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
 }
+
 
 model Category {
   id            String         @id @default(uuid())
