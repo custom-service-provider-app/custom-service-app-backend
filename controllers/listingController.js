@@ -2,36 +2,12 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-// exports.createListing = async (req, res) => {
-//   const { title, description, price, location, categoryId, subCategoryId } = req.body;
-//   const sellerId = req.user.userId; // Extract from authenticated user
-
-//   try {
-//     const listing = await prisma.listing.create({
-//       data: {
-//         title,
-//         description,
-//         price: parseFloat(price),
-//         location,
-//         categoryId,
-//         subCategoryId, // ✅ Correct field name (with capital "C")
-//         ownerId: sellerId, // ✅ Assign logged-in seller
-//         status: "PENDING", // ✅ Default status
-//       },
-//     });
-
-//     res.status(201).json({ message: "Listing created successfully, pending approval.", listing });
-//   } catch (error) {
-//     console.error("Error creating listing:", error);
-//     res.status(500).json({ error: "Server error while adding listing.", details: error.message });
-//   }
-// };
-
 exports.createListing = async (req, res) => {
   const {
     title,
     description,
-    price,
+    priceFrom, 
+    priceTo,
     location,
     latitude,
     longitude,
@@ -45,7 +21,8 @@ exports.createListing = async (req, res) => {
       data: {
         title,
         description,
-        price: parseFloat(price),
+        priceFrom: parseFloat(priceFrom),
+        priceTo: parseFloat(priceTo),
         location,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
@@ -63,16 +40,28 @@ exports.createListing = async (req, res) => {
   }
 };
 
-
 exports.getListings = async (req, res) => {
   try {
+    const { subcategory } = req.query;
+
+    const filter = { status: "APPROVED" };
+
+    if (subcategory) {
+      filter.subCategoryId = subcategory; // match your DB column name exactly
+    }
+
     const listings = await prisma.listing.findMany({
-      where: { status: "APPROVED" }, // Only fetch approved listings
-      include: { owner: { select: { name: true, email: true } } }, // Include seller details
+      where: filter,
+      include: { owner: { select: { name: true, email: true } } },
     });
 
-    res.json(listings);
+    if (listings.length === 0) {
+      return res.status(200).json({ message: "No listings found for your search.", listings: [] });
+    }
+
+    res.json({ listings });
   } catch (error) {
+    console.error("Error fetching listings:", error);
     res.status(500).json({ error: "Server error while fetching listings." });
   }
 };
@@ -108,4 +97,3 @@ exports.getListingsByCategory = async (req, res) => {
     res.status(500).json({ error: "Server error while fetching listings." });
   }
 };
-

@@ -21,7 +21,8 @@ model Listing {
   id            String   @id @default(uuid())
   title         String
   description   String
-  price         Float
+  priceFrom     Float
+  priceTo       Float
   location      String
   latitude      Float?   // ← NEW: Optional for now
   longitude     Float?   // ← NEW: Optional for now
@@ -34,7 +35,6 @@ model Listing {
   subcategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
 }
-
 
 model Category {
   id            String         @id @default(uuid())
