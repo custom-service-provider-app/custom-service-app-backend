@@ -1,45 +1,120 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// exports.searchListings = async (req, res) => {
+//   const q = req.query.q?.toLowerCase().trim();
+//   const priceFrom = parseInt(req.query.priceFrom) || 0;
+//   const priceTo = parseInt(req.query.priceTo) || 999999;
+
+//   try {
+//     let listings = [];
+
+//     const priceFilter = {
+//       AND: [
+//         { priceFrom: { lte: priceTo } }, // listing min price must be <= requested max
+//         { priceTo: { gte: priceFrom } }  // listing max price must be >= requested min
+//       ]
+//     };
+
+//     if (q) {
+//       // Try matching subcategory first
+//       const matchedSub = await prisma.subCategory.findFirst({
+//         where: { name: { contains: q, mode: "insensitive" } }
+//       });
+
+//       if (matchedSub) {
+//         listings = await prisma.listing.findMany({
+//           where: {
+//             subCategoryId: matchedSub.id,
+//             status: "APPROVED",
+//             ...priceFilter
+//           },
+//           include: { owner: { select: { name: true } } }
+//         });
+//       } else {
+//         // Fallback: search in title/description
+//         listings = await prisma.listing.findMany({
+//           where: {
+//             status: "APPROVED",
+//             OR: [
+//               { title: { contains: q, mode: "insensitive" } },
+//               { description: { contains: q, mode: "insensitive" } }
+//             ],
+//             ...priceFilter
+//           },
+//           include: { owner: { select: { name: true } } }
+//         });
+//       }
+//     } else {
+//       // No q → filter by price only
+//       listings = await prisma.listing.findMany({
+//         where: {
+//           status: "APPROVED",
+//           ...priceFilter
+//         },
+//         include: { owner: { select: { name: true } } }
+//       });
+//     }
+
+//     if (listings.length === 0) {
+//       return res.status(200).json({ message: "No results" });
+//     }
+
+//     return res.json({ listings });
+//   } catch (err) {
+//     console.error("Error in search:", err);
+//     res.status(500).json({ error: "Server error in search" });
+//   }
+// };
+
+
 exports.searchListings = async (req, res) => {
-  const q = req.query.q?.toLowerCase().trim();
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  // KEEP subcategory as-is (it's a UUID/string). Do NOT parseInt.
+  const subCategoryId = req.query.subcategory || null;
 
-  if (!q) {
-    return res.status(400).json({ message: "Query is required" });
-  }
+  // numbers with sane defaults
+  let priceFrom = Number.isFinite(parseInt(req.query.priceFrom)) ? parseInt(req.query.priceFrom) : 0;
+  let priceTo   = Number.isFinite(parseInt(req.query.priceTo))   ? parseInt(req.query.priceTo)   : 999999;
 
-  const keywords = ["rooms", "room", "to-let", "tolet", "rent", "rooms on rent", "rent rooms"];
+  // guard rails
+  if (priceFrom < 0) priceFrom = 0;
+  if (priceTo < priceFrom) [priceFrom, priceTo] = [priceTo, priceFrom];
 
-  let listings = [];
+  // STRICT “falls within” filter:
+  // listing.priceFrom >= user.priceFrom AND listing.priceTo <= user.priceTo
+  const strictPriceFilter = {
+    priceFrom: { gte: priceFrom },
+    priceTo:   { lte: priceTo }
+  };
 
   try {
-    // 1. exact subcategory match
-    const matchedSub = await prisma.subCategory.findFirst({
-        where: { name: { contains: q, mode: "insensitive" } }
+    let where = { status: "APPROVED", ...strictPriceFilter };
+
+    if (subCategoryId) {
+      // ✅ Only this subcategory
+      where.subCategoryId = subCategoryId;
+    } else if (q) {
+      // optional text search when no explicit subcategory passed
+      where = {
+        ...where,
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } }
+        ]
+      };
+    }
+
+    const listings = await prisma.listing.findMany({
+      where,
+      include: { owner: { select: { name: true } } }
     });
 
-    if (matchedSub) {
-      listings = await prisma.listing.findMany({
-        where: {
-          subCategoryId: matchedSub.id,
-          status: "APPROVED"
-        },
-        include: { owner: { select: { name: true } } }
-      });
-    } else if (keywords.includes(q)) {
-      // 2. keyword match -> all approved
-      listings = await prisma.listing.findMany({
-        where: { status: "APPROVED" },
-        include: { owner: { select: { name: true } } }
-      });
-    }
-
-    if (listings.length === 0) {
+    if (!listings.length) {
       return res.status(200).json({ message: "No results" });
-    } else {
-      return res.json({ listings });
     }
 
+    return res.json({ listings });
   } catch (err) {
     console.error("Error in search:", err);
     res.status(500).json({ error: "Server error in search" });
