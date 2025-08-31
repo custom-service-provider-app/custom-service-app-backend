@@ -14,7 +14,8 @@ exports.verifyToken = (req, res, next) => {
 };
 
 exports.isAdmin = (req, res, next) => {
-  if (req.user.role !== "ADMIN") {
+  // if (req.user.role !== "ADMIN")
+  if (req.user.role === "ADMIN" || req.user.role === "SELLER") {
     return res.status(403).json({ error: "Access denied. Only ADMIN can perform this action." });
   }
   next();
