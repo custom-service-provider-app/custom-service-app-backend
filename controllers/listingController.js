@@ -6,14 +6,19 @@ exports.createListing = async (req, res) => {
   const {
     title,
     description,
-    priceFrom, 
+    priceFrom,
     priceTo,
     location,
     latitude,
     longitude,
+    state,
+    city,
+    pincode,
+    area,
     categoryId,
     subCategoryId
   } = req.body;
+
   const sellerId = req.user.userId;
 
   try {
@@ -26,6 +31,10 @@ exports.createListing = async (req, res) => {
         location,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
+        state,
+        city,
+        pincode,
+        area,
         categoryId,
         subCategoryId,
         ownerId: sellerId,
@@ -33,10 +42,16 @@ exports.createListing = async (req, res) => {
       },
     });
 
-    res.status(201).json({ message: "Listing created successfully, pending approval.", listing });
+    res.status(201).json({
+      message: "Listing created successfully, pending approval.",
+      listing,
+    });
   } catch (error) {
     console.error("Error creating listing:", error);
-    res.status(500).json({ error: "Server error while adding listing.", details: error.message });
+    res.status(500).json({
+      error: "Server error while adding listing.",
+      details: error.message,
+    });
   }
 };
 
