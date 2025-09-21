@@ -55,15 +55,39 @@ exports.createListing = async (req, res) => {
   }
 };
 
+// exports.getListings = async (req, res) => {
+//   try {
+//     const { subcategory } = req.query;
+
+//     const filter = { status: "APPROVED" };
+
+//     if (subcategory) {
+//       filter.subCategoryId = subcategory; // match your DB column name exactly
+//     }
+
+//     const listings = await prisma.listing.findMany({
+//       where: filter,
+//       include: { owner: { select: { name: true, email: true } } },
+//     });
+
+//     if (listings.length === 0) {
+//       return res.status(200).json({ message: "No listings found for your search.", listings: [] });
+//     }
+
+//     res.json({ listings });
+//   } catch (error) {
+//     console.error("Error fetching listings:", error);
+//     res.status(500).json({ error: "Server error while fetching listings." });
+//   }
+// };
+
 exports.getListings = async (req, res) => {
   try {
-    const { subcategory } = req.query;
+    const { subcategory, pincode } = req.query;
 
     const filter = { status: "APPROVED" };
-
-    if (subcategory) {
-      filter.subCategoryId = subcategory; // match your DB column name exactly
-    }
+    if (subcategory) filter.subCategoryId = subcategory;
+    if (pincode) filter.pincode = pincode;
 
     const listings = await prisma.listing.findMany({
       where: filter,
@@ -80,6 +104,7 @@ exports.getListings = async (req, res) => {
     res.status(500).json({ error: "Server error while fetching listings." });
   }
 };
+
 
 exports.getListingsByCategory = async (req, res) => {
   try {
