@@ -1,76 +1,10 @@
+// controllers/searchController.js
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// exports.searchListings = async (req, res) => {
-//   const q = req.query.q?.toLowerCase().trim();
-//   const priceFrom = parseInt(req.query.priceFrom) || 0;
-//   const priceTo = parseInt(req.query.priceTo) || 999999;
-
-//   try {
-//     let listings = [];
-
-//     const priceFilter = {
-//       AND: [
-//         { priceFrom: { lte: priceTo } }, // listing min price must be <= requested max
-//         { priceTo: { gte: priceFrom } }  // listing max price must be >= requested min
-//       ]
-//     };
-
-//     if (q) {
-//       // Try matching subcategory first
-//       const matchedSub = await prisma.subCategory.findFirst({
-//         where: { name: { contains: q, mode: "insensitive" } }
-//       });
-
-//       if (matchedSub) {
-//         listings = await prisma.listing.findMany({
-//           where: {
-//             subCategoryId: matchedSub.id,
-//             status: "APPROVED",
-//             ...priceFilter
-//           },
-//           include: { owner: { select: { name: true } } }
-//         });
-//       } else {
-//         // Fallback: search in title/description
-//         listings = await prisma.listing.findMany({
-//           where: {
-//             status: "APPROVED",
-//             OR: [
-//               { title: { contains: q, mode: "insensitive" } },
-//               { description: { contains: q, mode: "insensitive" } }
-//             ],
-//             ...priceFilter
-//           },
-//           include: { owner: { select: { name: true } } }
-//         });
-//       }
-//     } else {
-//       // No q → filter by price only
-//       listings = await prisma.listing.findMany({
-//         where: {
-//           status: "APPROVED",
-//           ...priceFilter
-//         },
-//         include: { owner: { select: { name: true } } }
-//       });
-//     }
-
-//     if (listings.length === 0) {
-//       return res.status(200).json({ message: "No results" });
-//     }
-
-//     return res.json({ listings });
-//   } catch (err) {
-//     console.error("Error in search:", err);
-//     res.status(500).json({ error: "Server error in search" });
-//   }
-// };
-
-
 exports.searchListings = async (req, res) => {
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
-  // KEEP subcategory as-is (it's a UUID/string). Do NOT parseInt.
+
   const subCategoryId = req.query.subcategory || null;
 
   // numbers with sane defaults
@@ -81,8 +15,6 @@ exports.searchListings = async (req, res) => {
   if (priceFrom < 0) priceFrom = 0;
   if (priceTo < priceFrom) [priceFrom, priceTo] = [priceTo, priceFrom];
 
-  // STRICT “falls within” filter:
-  // listing.priceFrom >= user.priceFrom AND listing.priceTo <= user.priceTo
   const strictPriceFilter = {
     priceFrom: { gte: priceFrom },
     priceTo:   { lte: priceTo }
@@ -94,20 +26,25 @@ exports.searchListings = async (req, res) => {
     if (subCategoryId) {
       // ✅ Only this subcategory
       where.subCategoryId = subCategoryId;
-    } else if (q) {
-      // optional text search when no explicit subcategory passed
+    }
+
+    if (q) {
+      // ✅ Text search across multiple fields
       where = {
         ...where,
         OR: [
-          { title: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } }
-        ]
+          { title:       { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { state:       { contains: q, mode: "insensitive" } },
+          { city:        { contains: q, mode: "insensitive" } },
+          { area:        { contains: q, mode: "insensitive" } },
+        ],
       };
     }
 
     const listings = await prisma.listing.findMany({
       where,
-      include: { owner: { select: { name: true } } }
+      include: { owner: { select: { name: true } } },
     });
 
     if (!listings.length) {
