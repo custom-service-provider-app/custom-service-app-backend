@@ -105,7 +105,6 @@ exports.getListings = async (req, res) => {
   }
 };
 
-
 exports.getListingsByCategory = async (req, res) => {
   try {
     const { categoryId, subCategoryId } = req.query; // Get filter params from query
