@@ -81,31 +81,46 @@ exports.createListing = async (req, res) => {
 
 exports.getListings = async (req, res) => {
   try {
-    const { subcategory, pincode } = req.query;
+    const { subcategory, state, city, area } = req.query;
 
     console.log("📩 Received query:", req.query);
 
-    const filter = { status: "APPROVED" };
+    // Build Prisma filter dynamically
+    const filter = {
+      status: 'APPROVED',
+    };
+
     if (subcategory) filter.subCategoryId = subcategory;
-    if (pincode) filter.pincode = pincode;
+    if (state) filter.state = { equals: state, mode: 'insensitive' };
+    if (city) filter.city = { equals: city, mode: 'insensitive' };
+    if (area) filter.area = { equals: area, mode: 'insensitive' };
 
     console.log("🔍 Prisma filter:", filter);
 
+    // Fetch listings from database
     const listings = await prisma.listing.findMany({
       where: filter,
-      include: { owner: { select: { name: true, email: true } } },
+      include: {
+        owner: true,
+      },
     });
 
     console.log("✅ Listings found:", listings.length);
 
-    if (listings.length === 0) {      
-      return res.status(200).json({ message: "No listings found for your search.", listings: [] });
+    if (listings.length === 0) {
+      return res.status(200).json({
+        message: "No listings found for your search.",
+        listings: [],
+      });
     }
 
-    res.json({ listings });
+    return res.json({ listings });
+
   } catch (error) {
-    console.error("❌ Error fetching listings:", err);
-    res.status(500).json({ error: "Server error while fetching listings." });
+    console.error("❌ Error fetching listings:", error);
+    return res.status(500).json({
+      error: "Server error while fetching listings.",
+    });
   }
 };
 
