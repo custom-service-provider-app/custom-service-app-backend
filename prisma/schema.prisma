@@ -46,8 +46,7 @@ model Listing {
   latitude      Float?
   longitude     Float?
   state         String?
-  city          String?
-  pincode       String?
+  city          String?  
   area          String?
   status        Status   @default(PENDING)
   ownerId       String

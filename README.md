@@ -28,3 +28,18 @@ curl -X POST http://localhost:5000/api/subcategories \
 
 Response Example :  
 {"message":"Subcategory created","subcategory":{"id":"aeba9115-2ff3-4591-ae66-9209041899fb","name":"PG","categoryId":"a9f36cd9-f221-4f23-ab78-0f82c2dd3e75","createdAt":"2025-10-11T07:38:03.572Z"}}
+
+
+
+
+
+
+
+
+================================================================
+
+New requirements - 
+- searchbox from home screen to be removed.
+- search glass to be added in footer menu.
+- select location - pin codes to be removed.
+- icons on homescreen to be bigger like the listing creation screen.
