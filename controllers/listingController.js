@@ -12,8 +12,7 @@ exports.createListing = async (req, res) => {
     latitude,
     longitude,
     state,
-    city,
-    pincode,
+    city,    
     area,
     categoryId,
     subCategoryId
@@ -32,8 +31,7 @@ exports.createListing = async (req, res) => {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         state,
-        city,
-        pincode,
+        city,        
         area,
         categoryId,
         subCategoryId,
@@ -85,22 +83,28 @@ exports.getListings = async (req, res) => {
   try {
     const { subcategory, pincode } = req.query;
 
+    console.log("📩 Received query:", req.query);
+
     const filter = { status: "APPROVED" };
     if (subcategory) filter.subCategoryId = subcategory;
     if (pincode) filter.pincode = pincode;
+
+    console.log("🔍 Prisma filter:", filter);
 
     const listings = await prisma.listing.findMany({
       where: filter,
       include: { owner: { select: { name: true, email: true } } },
     });
 
-    if (listings.length === 0) {
+    console.log("✅ Listings found:", listings.length);
+
+    if (listings.length === 0) {      
       return res.status(200).json({ message: "No listings found for your search.", listings: [] });
     }
 
     res.json({ listings });
   } catch (error) {
-    console.error("Error fetching listings:", error);
+    console.error("❌ Error fetching listings:", err);
     res.status(500).json({ error: "Server error while fetching listings." });
   }
 };
