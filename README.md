@@ -43,3 +43,8 @@ New requirements -
 - search glass to be added in footer menu.
 - select location - pin codes to be removed.
 - icons on homescreen to be bigger like the listing creation screen.
+
+NEW ISSUES IN APK - 
+- when we are adding a new listing we are NOT ABLE to type and search for the exact location.
+- listings are returned based on only sub-categories, it is not taking the location into account.
+- other small adjustments in font color getting unseen due to bgColor being white.
