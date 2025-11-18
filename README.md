@@ -13,6 +13,17 @@ password : 123456
 
 ##########################################################################
 
+# To login as admin
+curl -X POST http://localhost:5000/api/admin/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "jdxcodedev@gmail.com",
+  "password": "123456"
+}'
+
+Response example : 
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5ZTM1MmZkMC01YjA5LTQ1MTItYmJhMS1hMDNhYWVlMWFmZGUiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjM0NjYzMzgsImV4cCI6MTc2MzU1MjczOH0.hE00qMHcT5VWi6H3Ya_Qb1MYrDWFvi1YTHpPtxuvxts","user":{"id":"9e352fd0-5b09-4512-bba1-a03aaee1afde","name":"Jd Admin","email":"jdxcodedev@gmail.com","password":"$2b$10$0Jg7CLlbqRs1fZ4DlHjWKuMCz6T8poHUdI2g9UZALHcCibMTxOkpG","role":"ADMIN","createdAt":"2025-03-11T09:00:33.089Z"}}
+
 # To create a new category
 curl -X POST http://localhost:5000/api/categories \
   -H "Content-Type: application/json" \
