@@ -10,6 +10,7 @@ const mapRoutes = require('./routes/mapRoutes');
 const searchRoutes = require("./routes/searchRoutes");
 const filterSearchRoutes = require("./routes/filterSearchRoutes");
 const placesRoutes = require("./routes/placesRoutes");
+const driverRoutes = require("./routes/driverRoutes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/maps', mapRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/filter", filterSearchRoutes);
 app.use("/api/places", placesRoutes);
+app.use("/api/drivers", driverRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

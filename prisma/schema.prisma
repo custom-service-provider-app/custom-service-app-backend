@@ -17,24 +17,30 @@ model User {
   createdAt DateTime  @default(now())
 }
 
-// model Listing {
-//   id            String   @id @default(uuid())
-//   title         String
-//   description   String
-//   priceFrom     Float
-//   priceTo       Float
-//   location      String
-//   latitude      Float?   // ← NEW: Optional for now
-//   longitude     Float?   // ← NEW: Optional for now
-//   status        Status   @default(PENDING)
-//   ownerId       String
-//   owner         User     @relation(fields: [ownerId], references: [id])
-//   categoryId    String
-//   category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-//   subCategoryId String?
-//   subcategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-//   createdAt     DateTime @default(now())
+// model Driver {
+//   id         String   @id @default(uuid())
+//   name       String
+//   phone      String   @unique
+//   licenseNo  String   @unique
+//   vehicleNo  String?
+//   createdAt  DateTime @default(now())
 // }
+
+model Driver {
+  id                       String      @id @default(uuid())
+  name                     String
+  phone                    String      @unique
+  licenseNo                String      @unique
+  vehicleNo                String?
+  isAvailable              Boolean     @default(true)
+  drivingAreas             String[]    // list of areas
+  drivingExperience        Int?        // in months
+  driverPhoto              String?     // URL of image (optional for now)
+  dateOfBirth              DateTime?
+  drivingLicenceDocument   String?
+  aadhaarCardDocument      String?
+  createdAt                DateTime    @default(now())
+}
 
 model Listing {
   id            String   @id @default(uuid())
