@@ -10,7 +10,6 @@ password :
 email : jdxcodedev@gmail.com
 password : 123456
 
-
 ##########################################################################
 
 # To login as admin
